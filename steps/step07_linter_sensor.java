@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 // Step 7: Linter sensor — feedback, computational. THE SIGNATURE DEMO.
 // After every write, the linter runs automatically. If it finds issues,
@@ -29,16 +30,16 @@ void main(String[] args) {
     agent.registerTool(RunCodemod.SPEC, tu -> tu.input(RunCodemod.class).execute());
 
     // THE KEY: afterWriteHook runs the linter on every written .java file
-    var lintIterations = new int[]{0}; // mutable counter
+    var lintIterations = new AtomicInteger(0);
     agent.afterWriteHook = (filePath, content) -> {
         if (!filePath.endsWith(".java")) return null;
-        if (lintIterations[0] >= MAX_LINT_ITERATIONS) {
+        if (lintIterations.get() >= MAX_LINT_ITERATIONS) {
             IO.println("[linter] Iteration limit reached (" + MAX_LINT_ITERATIONS + "), skipping.");
             return null;
         }
-        lintIterations[0]++;
+        lintIterations.incrementAndGet();
 
-        IO.println("[linter] Running ResultUnwrapChecker on " + filePath + " (iteration " + lintIterations[0] + ")");
+        IO.println("[linter] Running ResultUnwrapChecker on " + filePath + " (iteration " + lintIterations.get() + ")");
         try {
             var proc = new ProcessBuilder("jbang", "outer-harness/linters/ResultUnwrapChecker.java", filePath)
                     .redirectErrorStream(true).start();
@@ -46,10 +47,14 @@ void main(String[] args) {
             var exitCode = proc.waitFor();
             if (exitCode != 0) {
                 IO.println("[linter] Issues found! Injecting feedback.");
-                return "LINTER FEEDBACK (you MUST fix these issues):\n\n" + output;
+                return "LINTER FEEDBACK — MANDATORY FIX REQUIRED:\n\n" + output
+                        + "\n\nYou MUST immediately rewrite the file to fix these issues. "
+                        + "These are mandatory project safety rules, not suggestions. "
+                        + "Do NOT explain the problem, do NOT ask the user, do NOT try compiling to verify. "
+                        + "Rewrite the code using pattern matching as shown above and call write_file now.";
             } else {
                 IO.println("[linter] Clean.");
-                lintIterations[0] = 0; // Reset for next file
+                lintIterations.set(0);
                 return null;
             }
         } catch (Exception e) {

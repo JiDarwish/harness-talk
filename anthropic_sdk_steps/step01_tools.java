@@ -35,7 +35,8 @@ void main(String[] args) {
     IO.println();
 
     var paramsBuilder = MessageCreateParams.builder()
-            .model(Model.CLAUDE_HAIKU_4_5)
+//            .model(Model.CLAUDE_HAIKU_4_5)
+            .model(Model.CLAUDE_SONNET_4_5)
             .maxTokens(8192)
             .addTool(ReadFile.class)
             .addTool(WriteFile.class)

@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 // Step 9: Review skill — feedback, inferential. LLM-as-judge.
 // "Instructions how to review, feedback, inferential, e.g. Skills." — Böckeler
@@ -25,11 +27,11 @@ void main(String[] args) {
     agent.registerTool(RunCodemod.SPEC, tu -> tu.input(RunCodemod.class).execute());
 
     // Linter + ArchUnit sensor (same as Step 8)
-    var iterations = new int[]{0};
+    var iterations = new AtomicInteger(0);
     agent.afterWriteHook = (filePath, content) -> {
         if (!filePath.endsWith(".java")) return null;
-        if (iterations[0] >= MAX_LINT_ITERATIONS) return null;
-        iterations[0]++;
+        if (iterations.get() >= MAX_LINT_ITERATIONS) return null;
+        iterations.incrementAndGet();
 
         var feedback = new StringBuilder();
 
@@ -49,15 +51,15 @@ void main(String[] args) {
             } catch (Exception e) { /* skip */ }
         }
 
-        if (feedback.isEmpty()) { iterations[0] = 0; return null; }
+        if (feedback.isEmpty()) { iterations.set(0); return null; }
         return feedback.toString();
     };
 
     // THE KEY: afterDoneHook runs the LLM-as-judge review
-    var reviewDone = new boolean[]{false};
+    var reviewDone = new AtomicBoolean(false);
     agent.afterDoneHook = (runningAgent) -> {
-        if (reviewDone[0]) return false;
-        reviewDone[0] = true;
+        if (reviewDone.get()) return false;
+        reviewDone.set(true);
 
         IO.println("\n[review] Running local Ollama code review...");
 

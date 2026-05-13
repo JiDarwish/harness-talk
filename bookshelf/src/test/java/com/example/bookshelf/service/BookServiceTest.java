@@ -113,7 +113,6 @@ class BookServiceTest {
         assertThat(error).isInstanceOf(BookshelfError.MemberNotFound.class);
     }
 
-    @Disabled("TODO: fix borrow logic — should reject borrowing an unavailable book")
     @Test
     void borrowBook_unavailableBook_returnsBookNotAvailable() {
         var book = bookRepository.save(BookshelfFixtures.aBorrowedBook());

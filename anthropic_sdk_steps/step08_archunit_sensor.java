@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicInteger;
 
 // Step 8: ArchUnit sensor — feedback, computational.
 // "Structural tests, feedback, computational, e.g. a pre-commit (or coding agent) hook
@@ -29,11 +30,11 @@ void main(String[] args) {
     agent.registerTool(RunCodemod.class, tu -> tu.input(RunCodemod.class).execute());
 
     // afterWriteHook: run BOTH the linter AND ArchUnit
-    var iterations = new int[]{0};
+    var iterations = new AtomicInteger(0);
     agent.afterWriteHook = (filePath, content) -> {
         if (!filePath.endsWith(".java")) return null;
-        if (iterations[0] >= MAX_LINT_ITERATIONS) return null;
-        iterations[0]++;
+        if (iterations.get() >= MAX_LINT_ITERATIONS) return null;
+        iterations.incrementAndGet();
 
         var feedback = new StringBuilder();
 
@@ -67,7 +68,7 @@ void main(String[] args) {
         }
 
         if (feedback.isEmpty()) {
-            iterations[0] = 0;
+            iterations.set(0);
             return null;
         }
         return feedback.toString();
