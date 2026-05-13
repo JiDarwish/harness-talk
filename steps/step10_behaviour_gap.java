@@ -100,17 +100,22 @@ void main(String[] args) {
         IO.println("[review] Architecture review passed.");
         IO.println();
         IO.println("=== All sensors passed. But is the code correct? ===");
-        IO.println("The due-date calculation is wrong. No sensor caught it.");
-        IO.println("This is the behaviour gap — the elephant in the room.");
+        IO.println("The agent used LocalDateTime without timezone awareness.");
+        IO.println("The library opens at 9 AM Eastern, but the server runs in UTC.");
+        IO.println("A 9:30 AM local return shows as 1:30 PM UTC and gets charged.");
+        IO.println("The agent-written tests share the same assumption, so they pass too.");
+        IO.println("This is the behaviour gap -- the elephant in the room.");
         return false;
     };
 
     // A task that's structurally correct but behaviourally wrong:
-    // the agent will almost certainly implement 7 calendar days, not 7 business days.
-    // All sensors pass because the code is structurally correct.
-    // But the behaviour is wrong.
+    // The agent will almost certainly use LocalDate/LocalDateTime without timezone
+    // awareness. The library is in US/Eastern, but the server runs in UTC.
+    // A member returning a book at 9:30 AM local time gets charged a late fee
+    // because the server sees 1:30 PM UTC -- past the waiver window.
+    // The agent-written tests will use the same wrong timezone assumption, so they pass.
     var task = args.length > 0 ? String.join(" ", args)
-            : "Add a loan extension feature: POST /api/loans/{id}/extend should extend the due date by 7 days. But the business rule is: the extension should be 7 BUSINESS days (excluding weekends), not 7 calendar days. Implement it in LoanService, add the controller endpoint, and write a test.";
+            : "Add a late fee waiver feature to LoanService: if a member returns a book within 1 hour of the library opening time (9:00 AM), waive the late fee for that day. The library is in the US/Eastern timezone. Add a POST /api/loans/{id}/return-with-waiver endpoint to LoanController and write a test.";
 
     agent.run(task);
 }

@@ -519,6 +519,16 @@ body.edit-active [contenteditable]:focus {
 .slide-refs span {
     display: block;
 }
+.slide-refs a {
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    transition: border-color 0.2s, opacity 0.2s;
+}
+.slide-refs a:hover {
+    opacity: 1;
+    border-bottom-color: var(--accent);
+}
 
 /* ===========================================
    CLOSING SLIDE
@@ -589,9 +599,9 @@ body.edit-active [contenteditable]:focus {
         </ul>
     </div>
     <div class="slide-refs">
-        <span>Google Cloud Next, Apr 2026</span>
-        <span>TechCrunch / Airbnb, May 2026</span>
-        <span>Yahoo/BI / OpenAI, May 2026</span>
+        <span><a href="https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/cloud-next-2026-sundar-pichai/" target="_blank">Google Cloud Next, Apr 2026</a></span>
+        <span><a href="https://techcrunch.com/2026/05/08/airbnb-says-ai-now-writes-60-of-its-new-code/" target="_blank">TechCrunch / Airbnb, May 2026</a></span>
+        <span><a href="https://tech.yahoo.com/ai/chatgpt/articles/openais-president-says-ai-gone-055413804.html" target="_blank">Yahoo/BI / OpenAI, May 2026</a></span>
     </div>
 </section>
 
@@ -613,9 +623,8 @@ body.edit-active [contenteditable]:focus {
         <p class="reveal" style="margin-top: var(--content-gap);"><strong>The center of gravity moved from autocomplete to supervised execution.</strong></p>
     </div>
     <div class="slide-refs">
-        <span>Gartner 2026 CIO Survey</span>
-        <span>Yahoo/BI / OpenAI, May 2026</span>
-        <span>ET CIO / Meta, Mar 2026</span>
+        <span><a href="https://tech.yahoo.com/ai/chatgpt/articles/openais-president-says-ai-gone-055413804.html" target="_blank">Yahoo/BI / OpenAI, May 2026</a></span>
+        <span><a href="https://cio.economictimes.indiatimes.com/news/artificial-intelligence/meta-ai-coding-targets-75-ai-assisted-code-expected-for-engineers/129878974" target="_blank">ET CIO / Meta, Mar 2026</a></span>
     </div>
 </section>
 
@@ -638,9 +647,9 @@ body.edit-active [contenteditable]:focus {
         <p class="reveal" style="margin-top: var(--content-gap);"><strong>Adoption is not the same thing as an engineering foundation.</strong></p>
     </div>
     <div class="slide-refs">
-        <span>Gartner, Apr 2026</span>
-        <span>DryRun Security, Mar 2026</span>
-        <span>Gartner, Sep 2025</span>
+        <span><a href="https://www.gartner.com/en/newsroom/press-releases/2026-04-07-gartner-says-artificial-intelligence-projects-in-infrastructure-and-operations-stall-ahead-of-meaningful-roi-returns" target="_blank">Gartner, Apr 2026</a></span>
+        <span><a href="https://www.globenewswire.com/news-release/2026/03/11/3253696/0/en/New-DryRun-Security-Research-Anthropic-s-Claude-Generates-the-Most-Unresolved-Security-Flaws-in-AI-Built-Applications.html" target="_blank">DryRun Security, Mar 2026</a></span>
+        <span><a href="https://www.gartner.com/en/newsroom/press-releases/2025-09-30-gartner-survey-finds-just-15-percent-of-it-application-leaders-are-considering-piloting-or-deploying-fully-autonomous-ai-agents" target="_blank">Gartner, Sep 2025</a></span>
     </div>
 </section>
 
@@ -688,7 +697,7 @@ body.edit-active [contenteditable]:focus {
         </ul>
     </div>
     <div class="slide-refs">
-        <span>Trivedy, LangChain, Mar 2026</span>
+        <span><a href="https://blog.langchain.com/the-anatomy-of-an-agent-harness/" target="_blank">Trivedy, LangChain, Mar 2026</a></span>
     </div>
 </section>
 
@@ -711,7 +720,7 @@ body.edit-active [contenteditable]:focus {
         </ul>
     </div>
     <div class="slide-refs">
-        <span>Phil Schmid</span>
+        <span><a href="https://www.philschmid.de/agent-harness-2026" target="_blank">Phil Schmid, philschmid.de, 2026</a></span>
     </div>
 </section>
 
@@ -744,7 +753,7 @@ body.edit-active [contenteditable]:focus {
         </table>
     </div>
     <div class="slide-refs">
-        <span>Böckeler, Thoughtworks, 2025</span>
+        <span><a href="https://martinfowler.com/articles/harness-engineering.html" target="_blank">Böckeler, martinfowler.com, Apr 2026</a></span>
     </div>
 </section>
 
@@ -814,8 +823,8 @@ body.edit-active [contenteditable]:focus {
 }</code></pre>
     </div>
     <div class="slide-refs">
-        <span>Ball, "How to Build an Agent," 2026</span>
-        <span>Andersen, "A Coding Agent in 260 Lines of Java"</span>
+        <span><a href="https://ampcode.com/notes/how-to-build-an-agent" target="_blank">Ball, "How to Build an Agent," ampcode.com</a></span>
+        <span><a href="https://xam.dk/blog/nanocode-coding-agent-in-260-lines-of-java/" target="_blank">Andersen, "A Coding Agent in 260 Lines of Java," xam.dk</a></span>
     </div>
 </section>
 
@@ -974,10 +983,12 @@ body.edit-active [contenteditable]:focus {
                 </tr>
             </tbody>
         </table>
-        <p class="reveal" style="margin-top: var(--content-gap);"><strong>Direction:</strong> before or after the agent acts. <strong>Mechanism:</strong> deterministic or probabilistic.</p>
+        <p class="reveal" style="margin-top: var(--content-gap);"><strong>Horizontal Axis:</strong> before or after the agent acts.</p>
+        <p class="reveal" style="margin-top: var(--content-gap);"><strong>Vertical Axis:</strong> deterministic or probabilistic.</p>
+
     </div>
     <div class="slide-refs">
-        <span>Böckeler, Thoughtworks, 2025</span>
+        <span><a href="https://martinfowler.com/articles/harness-engineering.html" target="_blank">Böckeler, martinfowler.com, Apr 2026</a></span>
     </div>
 </section>
 
@@ -1085,7 +1096,7 @@ body.edit-active [contenteditable]:focus {
             <li>Did the architecture boundary hold?</li>
             <li>Did the behaviour match the business rule?</li>
         </ul>
-        <p class="reveal" style="margin-top: var(--content-gap);"><strong>That is why the right half of the talk is about sensors.</strong></p>
+        <p class="reveal" style="margin-top: var(--content-gap);"><strong>That is why the next half of the talk is about sensors.</strong></p>
     </div>
 </section>
 
@@ -1130,7 +1141,7 @@ body.edit-active [contenteditable]:focus {
             <div class="file">ollama_steps/step07_linter_sensor.java</div>
             <div class="cmd">Run a task that asks for unsafe Result narrowing.</div>
             <ul>
-                <li><code>afterWriteHook</code> triggers on every write</li>
+                <li>afterWriteHook triggers on every write</li>
                 <li>Linter output injected as feedback</li>
                 <li>Agent revises its own diff</li>
             </ul>
@@ -1268,10 +1279,9 @@ body.edit-active [contenteditable]:focus {
     <div class="slide-content">
         <h2 class="reveal">The behaviour gap</h2>
         <p class="reveal">All sensors can pass and the feature can still be wrong.</p>
-        <blockquote class="reveal" style="margin-top: var(--content-gap);">Extend a loan by 7 days.</blockquote>
-        <p class="reveal" style="margin-top: var(--element-gap);">Hidden requirement:</p>
-        <blockquote class="reveal"><strong>7 business days</strong>, excluding weekends.</blockquote>
-        <p class="reveal" style="margin-top: var(--content-gap);">Green checks can still encode the wrong product decision.</p>
+        <blockquote class="reveal" style="margin-top: var(--content-gap);">Waive the late fee if a book is returned within 1 hour of library opening (9 AM). The library is in US/Eastern.</blockquote>
+        <p class="reveal" style="margin-top: var(--element-gap);">The agent uses <code>LocalDateTime.now()</code>. The server runs in UTC.</p>
+        <p class="reveal">A 9:30 AM Eastern return shows as 1:30 PM UTC. Fee charged. Tests pass because they share the same wrong assumption.</p>
     </div>
 </section>
 
@@ -1320,6 +1330,27 @@ body.edit-active [contenteditable]:focus {
     </div>
 </section>
 
+<!-- Slide 34: BDD as the engineer's edge -->
+<section class="slide" data-section="gap">
+    <div class="slide-header">
+        <div class="section-num">06</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span class="active">GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">BDD becomes the engineer's most valuable skill</h2>
+        <p class="reveal">Agents can write code, tests, and docs. What they cannot do is <strong>imagine what should go wrong</strong>.</p>
+        <ul class="reveal" style="margin-top: var(--content-gap);">
+            <li>What happens at midnight when the timezone flips?</li>
+            <li>What happens when a member returns a book on a holiday?</li>
+            <li>What happens when two members borrow the last copy at the same time?</li>
+        </ul>
+        <p class="reveal" style="margin-top: var(--content-gap);">Thinking in edge cases, writing behaviour specifications, and encoding business intent as tests -- this is how engineers stay ahead of the gap.</p>
+        <p class="reveal" style="margin-top: var(--element-gap);"><strong>The most valuable engineer is not the one who writes the most code. It is the one who specifies the most edge cases.</strong></p>
+    </div>
+</section>
+
 <!-- =========================================== -->
 <!-- SECTION 07: CLOSE                           -->
 <!-- =========================================== -->
@@ -1334,7 +1365,7 @@ body.edit-active [contenteditable]:focus {
     </div>
     <div class="slide-content">
         <h2 class="reveal">What changes for engineers</h2>
-        <p class="reveal">We stop treating coding agents as individual geniuses. We start treating them as <strong>processes</strong>:</p>
+        <p class="reveal">We stop asking <strong>"is the model good enough?"</strong> We start asking <strong>"is the system around it good enough?"</strong></p>
         <ul class="reveal">
             <li>Narrow permissions</li>
             <li>Repeatable tools</li>
@@ -1346,25 +1377,25 @@ body.edit-active [contenteditable]:focus {
 </section>
 
 <!-- Slide 35: Monday morning version -->
-<section class="slide" data-section="close">
-    <div class="slide-header">
-        <div class="section-num">07</div>
-        <div class="breadcrumbs">
-            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span class="active">CLOSE</span>
-        </div>
-    </div>
-    <div class="slide-content">
-        <h2 class="reveal">Monday morning version</h2>
-        <p class="reveal">Pick one repo and add:</p>
-        <ol class="reveal">
-            <li>A short <code>AGENTS.md</code></li>
-            <li>One deterministic tool the agent should use instead of hand-editing</li>
-            <li>One linter message written for model self-correction</li>
-            <li>One architecture or behaviour test that runs automatically</li>
-            <li>One review prompt for a gap your tests do not cover</li>
-        </ol>
-    </div>
-</section>
+<!--<section class="slide" data-section="close">-->
+<!--    <div class="slide-header">-->
+<!--        <div class="section-num">07</div>-->
+<!--        <div class="breadcrumbs">-->
+<!--            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span class="active">CLOSE</span>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <div class="slide-content">-->
+<!--        <h2 class="reveal">Monday morning version</h2>-->
+<!--        <p class="reveal">Pick one repo and add:</p>-->
+<!--        <ol class="reveal">-->
+<!--            <li>A short <code>AGENTS.md</code></li>-->
+<!--            <li>One deterministic tool the agent should use instead of hand-editing</li>-->
+<!--            <li>One linter message written for model self-correction</li>-->
+<!--            <li>One architecture or behaviour test that runs automatically</li>-->
+<!--            <li>One review prompt for a gap your tests do not cover</li>-->
+<!--        </ol>-->
+<!--    </div>-->
+<!--</section>-->
 
 <!-- Slide 36: Closing -->
 <section class="slide closing-slide" data-section="close">
