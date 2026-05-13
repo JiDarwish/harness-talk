@@ -1,0 +1,49 @@
+{
+  "catalogs": {},
+  "aliases": {
+    "step00": {
+      "script-ref": "steps/step00_loop.java",
+      "description": "Step 0: Minimal agent loop with read_file"
+    },
+    "step01": {
+      "script-ref": "steps/step01_tools.java",
+      "description": "Step 1: Five tools with registry"
+    },
+    "step02": {
+      "script-ref": "steps/step02_prompts.java",
+      "description": "Step 2: System prompt and turn limit"
+    },
+    "step03": {
+      "script-ref": "steps/step03_inner_complete.java",
+      "description": "Step 3: Permissions and cost tracking"
+    },
+    "step04": {
+      "script-ref": "steps/step04_agents_md.java",
+      "description": "Step 4: AGENTS.md feedforward guide"
+    },
+    "step05": {
+      "script-ref": "steps/step05_skills.java",
+      "description": "Step 5: Skill loading (progressive disclosure)"
+    },
+    "step06": {
+      "script-ref": "steps/step06_codemod.java",
+      "description": "Step 6: Codemod tool (computational feedforward)"
+    },
+    "step07": {
+      "script-ref": "steps/step07_linter_sensor.java",
+      "description": "Step 7: Linter sensor with self-correction"
+    },
+    "step08": {
+      "script-ref": "steps/step08_archunit_sensor.java",
+      "description": "Step 8: ArchUnit structural sensor"
+    },
+    "step09": {
+      "script-ref": "steps/step09_review_skill.java",
+      "description": "Step 9: LLM-as-judge review skill"
+    },
+    "step10": {
+      "script-ref": "steps/step10_behaviour_gap.java",
+      "description": "Step 10: The behaviour gap"
+    }
+  }
+}

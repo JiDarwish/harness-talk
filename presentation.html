@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness Engineering for Agentic Coding</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* ===========================================
+   CSS CUSTOM PROPERTIES (BOLD SIGNAL THEME)
+   =========================================== */
+:root {
+    --bg-primary: #1a1a1a;
+    --bg-gradient: linear-gradient(145deg, #1a1a1a 0%, #252525 40%, #1e1e1e 100%);
+    --bg-code: #0d1520;
+    --card-bg: #FF5722;
+    --card-bg-dim: #e64a19;
+    --accent: #FF5722;
+    --accent-glow: rgba(255, 87, 34, 0.25);
+    --text-primary: #f0f0f0;
+    --text-secondary: #9ca3af;
+    --text-on-card: #1a1a1a;
+    --text-muted: #6b7280;
+    --border-subtle: rgba(255, 255, 255, 0.1);
+    --border-table: rgba(255, 255, 255, 0.15);
+    --table-header-bg: rgba(255, 87, 34, 0.12);
+
+    --font-display: 'Archivo Black', sans-serif;
+    --font-body: 'Space Grotesk', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    --title-size: clamp(1.5rem, 5vw, 4rem);
+    --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+    --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+    --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
+    --small-size: clamp(0.65rem, 1vw, 0.875rem);
+    --code-size: clamp(0.7rem, 1.4vw, 1.05rem);
+    --slide-padding: clamp(1.5rem, 4vw, 4rem);
+    --content-gap: clamp(0.5rem, 2vw, 2rem);
+    --element-gap: clamp(0.25rem, 1vw, 1rem);
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-normal: 0.6s;
+}
+
+/* ===========================================
+   BASE RESET
+   =========================================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ===========================================
+   VIEWPORT FITTING: MANDATORY BASE STYLES
+   =========================================== */
+html, body { height: 100%; overflow-x: hidden; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+.slide {
+    width: 100vw; height: 100vh; height: 100dvh;
+    overflow: hidden; scroll-snap-align: start;
+    display: flex; flex-direction: column; position: relative;
+    background: var(--bg-gradient);
+    font-family: var(--font-body);
+    color: var(--text-primary);
+}
+
+.slide-content {
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    max-height: 100%; overflow: hidden;
+    padding: var(--slide-padding);
+    padding-top: clamp(3rem, 6vh, 5rem);
+}
+
+.card, .container, .content-box {
+    max-width: min(90vw, 1000px);
+    max-height: min(80vh, 700px);
+}
+
+.feature-list, .bullet-list { gap: clamp(0.4rem, 1vh, 1rem); }
+.feature-list li, .bullet-list li { font-size: var(--body-size); line-height: 1.4; }
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+
+img, .image-container {
+    max-width: 100%; max-height: min(50vh, 400px); object-fit: contain;
+}
+
+@media (max-height: 700px) {
+    :root {
+        --slide-padding: clamp(0.75rem, 3vw, 2rem);
+        --content-gap: clamp(0.4rem, 1.5vw, 1rem);
+        --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+        --h2-size: clamp(1rem, 3vw, 1.75rem);
+    }
+}
+@media (max-height: 600px) {
+    :root {
+        --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+        --content-gap: clamp(0.3rem, 1vw, 0.75rem);
+        --title-size: clamp(1.1rem, 4vw, 2rem);
+        --body-size: clamp(0.7rem, 1.2vw, 0.95rem);
+    }
+    .nav-dots, .keyboard-hint, .decorative { display: none; }
+}
+@media (max-height: 500px) {
+    :root {
+        --slide-padding: clamp(0.4rem, 2vw, 1rem);
+        --title-size: clamp(1rem, 3.5vw, 1.5rem);
+        --h2-size: clamp(0.9rem, 2.5vw, 1.25rem);
+        --body-size: clamp(0.65rem, 1vw, 0.85rem);
+    }
+}
+@media (max-width: 600px) {
+    :root { --title-size: clamp(1.25rem, 7vw, 2.5rem); }
+    .grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+    html { scroll-behavior: auto; }
+}
+
+/* ===========================================
+   SECTION NUMBER + NAV BREADCRUMBS
+   =========================================== */
+.slide-header {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: clamp(1rem, 2.5vw, 2rem) var(--slide-padding);
+    z-index: 5; pointer-events: none;
+}
+.section-num {
+    font-family: var(--font-display);
+    font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+    color: var(--text-muted);
+}
+.breadcrumbs {
+    display: flex; gap: clamp(0.8rem, 2vw, 1.5rem);
+    font-size: clamp(0.5rem, 0.9vw, 0.7rem);
+    font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+}
+.breadcrumbs span { color: var(--text-muted); transition: color 0.3s; }
+.breadcrumbs span.active { color: var(--accent); }
+
+/* ===========================================
+   TYPOGRAPHY
+   =========================================== */
+h1 {
+    font-family: var(--font-display);
+    font-size: var(--title-size);
+    color: var(--text-primary);
+    line-height: 1.05;
+    margin-bottom: var(--content-gap);
+}
+h2 {
+    font-family: var(--font-display);
+    font-size: var(--h2-size);
+    color: var(--text-primary);
+    line-height: 1.1;
+    margin-bottom: var(--content-gap);
+}
+h3 {
+    font-family: var(--font-body);
+    font-size: var(--h3-size);
+    font-weight: 600; color: var(--text-primary);
+    margin-bottom: var(--element-gap);
+}
+p {
+    font-size: var(--body-size);
+    line-height: 1.6; color: var(--text-secondary);
+    max-width: 700px;
+}
+ul, ol {
+    font-size: var(--body-size);
+    line-height: 1.6; color: var(--text-secondary);
+    padding-left: 1.5em;
+    display: flex; flex-direction: column;
+    gap: clamp(0.3rem, 0.8vh, 0.6rem);
+}
+li { max-width: 700px; }
+strong { color: var(--accent); font-weight: 600; }
+blockquote {
+    border-left: 3px solid var(--accent);
+    padding-left: clamp(0.8rem, 2vw, 1.5rem);
+    font-size: clamp(0.85rem, 1.6vw, 1.2rem);
+    color: var(--text-primary);
+    font-style: italic; line-height: 1.5;
+    margin: var(--element-gap) 0;
+}
+.lead {
+    font-size: clamp(0.85rem, 1.8vw, 1.3rem);
+    color: var(--text-primary); line-height: 1.5;
+}
+
+/* ===========================================
+   CODE BLOCKS
+   =========================================== */
+pre {
+    background: var(--bg-code);
+    border-radius: 10px;
+    padding: clamp(0.8rem, 2vw, 1.5rem);
+    border: 1px solid var(--border-subtle);
+    overflow: hidden;
+    max-width: min(90vw, 800px);
+}
+pre code {
+    font-family: var(--font-mono);
+    font-size: var(--code-size);
+    line-height: 1.55;
+    color: #e2e8f0;
+    display: block;
+    white-space: pre;
+}
+code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background: rgba(255, 87, 34, 0.1);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 0.1em 0.35em;
+}
+pre code code { background: none; padding: 0; }
+
+/* Syntax highlighting */
+.k { color: #FF5722; font-weight: 500; }
+.t { color: #fbbf24; }
+.s { color: #34d399; }
+.c { color: #6b7280; font-style: italic; }
+.f { color: #60a5fa; }
+.n { color: #c084fc; }
+.p { color: #9ca3af; }
+
+/* Tree/text blocks */
+pre.tree code { color: #9ca3af; font-size: var(--code-size); }
+pre.tree .dir { color: #60a5fa; font-weight: 500; }
+pre.tree .comment { color: var(--text-muted); }
+
+/* ===========================================
+   TABLES (for 2x2 framework)
+   =========================================== */
+table {
+    width: 100%; max-width: min(90vw, 800px);
+    border-collapse: collapse;
+    font-size: clamp(0.65rem, 1.2vw, 0.95rem);
+}
+th, td {
+    border: 1px solid var(--border-table);
+    padding: clamp(0.5rem, 1.2vw, 1rem) clamp(0.6rem, 1.5vw, 1.2rem);
+    text-align: left; vertical-align: top;
+}
+th {
+    background: var(--table-header-bg);
+    color: var(--accent);
+    font-weight: 600;
+    font-size: clamp(0.6rem, 1.1vw, 0.85rem);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+td { color: var(--text-secondary); }
+td:first-child {
+    font-weight: 600; color: var(--text-primary);
+    white-space: nowrap;
+}
+
+/* ===========================================
+   DEMO GAP SLIDES (orange card)
+   =========================================== */
+.demo-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    max-width: min(90vw, 650px);
+    box-shadow: 0 8px 40px var(--accent-glow);
+}
+.demo-card h2 {
+    color: var(--text-on-card);
+    margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+}
+.demo-card .file {
+    font-family: var(--font-mono);
+    font-size: clamp(0.7rem, 1.3vw, 1rem);
+    background: rgba(0,0,0,0.15);
+    color: var(--text-on-card);
+    padding: 0.4em 0.8em;
+    border-radius: 6px;
+    display: inline-block;
+    margin-bottom: clamp(0.5rem, 1vh, 0.8rem);
+}
+.demo-card .cmd {
+    font-family: var(--font-mono);
+    font-size: clamp(0.65rem, 1.1vw, 0.85rem);
+    color: rgba(26,26,26,0.7);
+    margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+}
+.demo-card ul {
+    color: rgba(26,26,26,0.8);
+    padding-left: 1.2em;
+    gap: clamp(0.2rem, 0.5vh, 0.4rem);
+}
+.demo-card li { font-size: clamp(0.65rem, 1.2vw, 0.9rem); }
+.demo-label {
+    display: inline-block;
+    background: var(--text-on-card);
+    color: var(--accent);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: clamp(0.5rem, 0.8vw, 0.65rem);
+    padding: 0.25em 0.8em;
+    border-radius: 20px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: clamp(0.5rem, 1vh, 0.8rem);
+}
+
+/* ===========================================
+   TITLE SLIDE SPECIAL
+   =========================================== */
+.title-slide .slide-content {
+    justify-content: flex-end;
+    padding-bottom: clamp(2rem, 6vh, 5rem);
+}
+.title-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    max-width: min(90vw, 700px);
+}
+.title-card h1 { color: var(--text-on-card); line-height: 1.02; }
+.title-card p { color: rgba(26,26,26,0.7); max-width: 500px; }
+.title-badge {
+    display: inline-block;
+    background: var(--text-on-card);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: clamp(0.55rem, 0.9vw, 0.7rem);
+    padding: 0.3em 1em;
+    border-radius: 20px;
+    margin-top: clamp(0.5rem, 1.5vh, 1rem);
+}
+
+/* ===========================================
+   QUOTE SLIDE
+   =========================================== */
+.quote-slide .slide-content {
+    align-items: center; text-align: center;
+}
+.quote-slide blockquote {
+    border-left: none; text-align: center;
+    font-size: clamp(1rem, 2.2vw, 1.6rem);
+    max-width: 650px;
+    padding: 0;
+}
+.quote-label {
+    font-size: var(--small-size);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    margin-bottom: var(--element-gap);
+}
+
+/* ===========================================
+   TWO-COLUMN LAYOUT
+   =========================================== */
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    align-items: start;
+    max-width: min(90vw, 900px);
+}
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+.col-label {
+    font-size: clamp(0.55rem, 0.9vw, 0.7rem);
+    font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: clamp(0.3rem, 0.8vh, 0.5rem);
+}
+
+/* ===========================================
+   ANIMATIONS
+   =========================================== */
+.reveal {
+    opacity: 0; transform: translateY(25px);
+    transition: opacity var(--duration-normal) var(--ease-out-expo),
+                transform var(--duration-normal) var(--ease-out-expo);
+}
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
+.reveal:nth-child(1) { transition-delay: 0.1s; }
+.reveal:nth-child(2) { transition-delay: 0.2s; }
+.reveal:nth-child(3) { transition-delay: 0.3s; }
+.reveal:nth-child(4) { transition-delay: 0.4s; }
+.reveal:nth-child(5) { transition-delay: 0.5s; }
+
+.reveal-scale {
+    opacity: 0; transform: scale(0.95);
+    transition: opacity 0.7s var(--ease-out-expo), transform 0.7s var(--ease-out-expo);
+}
+.slide.visible .reveal-scale { opacity: 1; transform: scale(1); }
+
+/* ===========================================
+   PROGRESS BAR
+   =========================================== */
+.progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: var(--accent);
+    z-index: 100; width: 0;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 8px var(--accent-glow);
+}
+
+/* ===========================================
+   NAV DOTS
+   =========================================== */
+.nav-dots {
+    position: fixed; right: clamp(0.5rem, 1.5vw, 1.2rem);
+    top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column;
+    gap: clamp(4px, 0.6vh, 8px);
+    z-index: 90;
+}
+.nav-dot {
+    width: clamp(6px, 0.5vw, 8px);
+    height: clamp(6px, 0.5vw, 8px);
+    border-radius: 50%;
+    background: var(--text-muted);
+    opacity: 0.3;
+    cursor: pointer;
+    transition: opacity 0.3s, background 0.3s, transform 0.3s;
+    border: none; padding: 0;
+}
+.nav-dot.active {
+    opacity: 1; background: var(--accent);
+    transform: scale(1.4);
+}
+
+/* ===========================================
+   KEYBOARD HINT
+   =========================================== */
+.keyboard-hint {
+    position: fixed; bottom: clamp(0.8rem, 2vh, 1.5rem);
+    right: clamp(1rem, 3vw, 2rem);
+    font-family: var(--font-body);
+    font-size: clamp(0.5rem, 0.8vw, 0.65rem);
+    color: var(--text-muted);
+    opacity: 0.5; z-index: 90;
+    transition: opacity 1s;
+}
+.keyboard-hint.hidden { opacity: 0; pointer-events: none; }
+
+/* ===========================================
+   INLINE EDITING
+   =========================================== */
+.edit-hotzone {
+    position: fixed; top: 0; left: 0;
+    width: 80px; height: 80px;
+    z-index: 10000; cursor: pointer;
+}
+.edit-toggle {
+    position: fixed; top: 16px; left: 16px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 8px;
+    width: 40px; height: 40px;
+    font-size: 18px; cursor: pointer;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10001;
+    display: flex; align-items: center; justify-content: center;
+}
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-toggle.active { background: #4CAF50; }
+
+.edit-banner {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: var(--accent);
+    color: #fff; text-align: center;
+    font-family: var(--font-body);
+    font-size: clamp(0.6rem, 1vw, 0.75rem);
+    font-weight: 600;
+    padding: 6px; z-index: 9999;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+}
+.edit-banner.active { opacity: 1; }
+
+body.edit-active [contenteditable] {
+    outline: 2px dashed rgba(255, 87, 34, 0.4);
+    outline-offset: 4px;
+    border-radius: 4px;
+    min-height: 1em;
+}
+body.edit-active [contenteditable]:focus {
+    outline-color: var(--accent);
+    background: rgba(255, 87, 34, 0.05);
+}
+
+/* ===========================================
+   SLIDE REFERENCES
+   =========================================== */
+.slide-refs {
+    position: absolute;
+    bottom: clamp(0.6rem, 1.5vh, 1.2rem);
+    right: var(--slide-padding);
+    font-family: var(--font-body);
+    font-size: clamp(0.45rem, 0.7vw, 0.55rem);
+    color: var(--text-muted);
+    text-align: right;
+    line-height: 1.6;
+    max-width: min(50vw, 500px);
+    opacity: 0.6;
+    z-index: 4;
+}
+.slide-refs span {
+    display: block;
+}
+
+/* ===========================================
+   CLOSING SLIDE
+   =========================================== */
+.closing-slide .slide-content {
+    align-items: center; text-align: center;
+}
+</style>
+</head>
+<body>
+
+<!-- === PROGRESS BAR === -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- === NAV DOTS === -->
+<nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+
+<!-- === KEYBOARD HINT === -->
+<div class="keyboard-hint" id="keyboardHint">Arrow keys or scroll to navigate</div>
+
+<!-- === EDIT CONTROLS === -->
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Edit mode (E)">&#9998;</button>
+<div class="edit-banner" id="editBanner">EDIT MODE -- Click any text to edit -- Ctrl+S to save file</div>
+
+<!-- =========================================== -->
+<!-- SECTION 01: OPENING                         -->
+<!-- =========================================== -->
+
+<!-- Slide 1: Title -->
+<section class="slide title-slide" data-section="opening">
+    <div class="slide-header">
+        <div class="section-num">01</div>
+        <div class="breadcrumbs">
+            <span class="active">OPENING</span>
+            <span>HARNESS</span>
+            <span>INNER</span>
+            <span>OUTER</span>
+            <span>SENSORS</span>
+            <span>GAP</span>
+            <span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <div class="title-card reveal-scale">
+            <h1>Harness Engineering for Agentic Coding</h1>
+            <p>Local Ollama, real engineering controls, and the part of the agent we can actually own.</p>
+            <div class="title-badge">ENGINEERING TALK</div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 2: Evidence - headline numbers -->
+<section class="slide" data-section="opening">
+    <div class="slide-header">
+        <div class="section-num">01</div>
+        <div class="breadcrumbs">
+            <span class="active">OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">This is already happening</h2>
+        <ul class="reveal">
+            <li><strong>Stripe</strong> merges over 1,300 AI-generated pull requests every week</li>
+            <li><strong>Google</strong> says 75% of all new code is AI-generated and engineer-approved</li>
+            <li><strong>Airbnb</strong> says AI wrote 60% of code produced by engineers last quarter</li>
+            <li><strong>OpenAI</strong> built a million-line product with three engineers who wrote zero code by hand</li>
+        </ul>
+    </div>
+    <div class="slide-refs">
+        <span>Google Cloud Next, Apr 2026</span>
+        <span>TechCrunch / Airbnb, May 2026</span>
+        <span>Yahoo/BI / OpenAI, May 2026</span>
+    </div>
+</section>
+
+<!-- Slide 3: Delivery mechanism - broader trend -->
+<section class="slide" data-section="opening">
+    <div class="slide-header">
+        <div class="section-num">01</div>
+        <div class="breadcrumbs">
+            <span class="active">OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">This moved from assistant to delivery mechanism</h2>
+        <ul class="reveal">
+            <li><strong>Gartner:</strong> 64% of CIOs plan to deploy AI agents within 24 months</li>
+            <li><strong>OpenAI:</strong> AI coding tools moved from writing 20% to 80% of code</li>
+            <li><strong>Meta:</strong> internal target of 75%+ AI-assisted committed code by mid-2026</li>
+        </ul>
+        <p class="reveal" style="margin-top: var(--content-gap);"><strong>The center of gravity moved from autocomplete to supervised execution.</strong></p>
+    </div>
+    <div class="slide-refs">
+        <span>Gartner 2026 CIO Survey</span>
+        <span>Yahoo/BI / OpenAI, May 2026</span>
+        <span>ET CIO / Meta, Mar 2026</span>
+    </div>
+</section>
+
+<!-- Slide 4: The gotcha - real failure data -->
+<section class="slide" data-section="opening">
+    <div class="slide-header">
+        <div class="section-num">01</div>
+        <div class="breadcrumbs">
+            <span class="active">OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">The gotcha</h2>
+        <p class="reveal">The same sources tell the uncomfortable half:</p>
+        <ul class="reveal">
+            <li><strong>Gartner:</strong> 40% of AI agent deployments will fail due to inadequate engineering foundations</li>
+            <li><strong>DryRun Security:</strong> 26 of 30 AI-agent PRs introduced at least one vulnerability; 143 issues, no agent produced a fully secure app</li>
+            <li><strong>Gartner:</strong> only 13% of orgs have governance structures for agents; 74% see them as a new attack vector</li>
+        </ul>
+        <p class="reveal" style="margin-top: var(--content-gap);"><strong>Adoption is not the same thing as an engineering foundation.</strong></p>
+    </div>
+    <div class="slide-refs">
+        <span>Gartner, Apr 2026</span>
+        <span>DryRun Security, Mar 2026</span>
+        <span>Gartner, Sep 2025</span>
+    </div>
+</section>
+
+<!-- Slide 5: The useful question -->
+<section class="slide quote-slide" data-section="opening">
+    <div class="slide-header">
+        <div class="section-num">01</div>
+        <div class="breadcrumbs">
+            <span class="active">OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <div class="reveal">
+            <div class="quote-label">Not</div>
+            <blockquote style="color: var(--text-muted);">Which model will finally make agents reliable?</blockquote>
+        </div>
+        <div class="reveal" style="margin-top: clamp(1.5rem, 4vh, 3rem);">
+            <div class="quote-label">But</div>
+            <blockquote>What system do we build around the model so the agent can be steered, checked, and improved?</blockquote>
+        </div>
+    </div>
+</section>
+
+<!-- =========================================== -->
+<!-- SECTION 02: HARNESS                         -->
+<!-- =========================================== -->
+
+<!-- Slide 6: Agent = model + harness -->
+<section class="slide" data-section="harness">
+    <div class="slide-header">
+        <div class="section-num">02</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span class="active">HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Agent = model + harness</h2>
+        <p class="lead reveal">If you are not training the model, the harness is the part you can engineer.</p>
+        <ul class="reveal" style="margin-top: var(--content-gap);">
+            <li>Tools it can call</li>
+            <li>System prompt and project context</li>
+            <li>Permissions and boundaries</li>
+            <li>Feedback loops and sensors</li>
+            <li>Guides that steer before action</li>
+        </ul>
+    </div>
+    <div class="slide-refs">
+        <span>Trivedy, LangChain, Mar 2026</span>
+    </div>
+</section>
+
+<!-- Slide 7: Model thinks, harness decides -->
+<section class="slide" data-section="harness">
+    <div class="slide-header">
+        <div class="section-num">02</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span class="active">HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">The model thinks. The harness decides what is allowed.</h2>
+        <ul class="reveal">
+            <li>What can the model see?</li>
+            <li>What can it change?</li>
+            <li>What deterministic tools can it use?</li>
+            <li>What checks run after it acts?</li>
+            <li>What gets sent back for self-correction?</li>
+        </ul>
+    </div>
+    <div class="slide-refs">
+        <span>Phil Schmid</span>
+    </div>
+</section>
+
+<!-- Slide 8: Two layers -->
+<section class="slide" data-section="harness">
+    <div class="slide-header">
+        <div class="section-num">02</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span class="active">HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Two layers</h2>
+        <table class="reveal">
+            <thead>
+                <tr><th>Layer</th><th>Who owns it</th><th>What it contains</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Inner harness</td>
+                    <td>tool / vendor / runtime</td>
+                    <td>Model calls, tool calling, message loop, orchestration</td>
+                </tr>
+                <tr>
+                    <td>Outer harness</td>
+                    <td><strong>us</strong></td>
+                    <td>Repo conventions, deterministic tools, sensors, reviews, policies</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="slide-refs">
+        <span>Böckeler, Thoughtworks, 2025</span>
+    </div>
+</section>
+
+<!-- =========================================== -->
+<!-- SECTION 03: INNER HARNESS                   -->
+<!-- =========================================== -->
+
+<!-- Slide 9: Demo app -->
+<section class="slide" data-section="inner">
+    <div class="slide-header">
+        <div class="section-num">03</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span class="active">INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">The demo app</h2>
+        <pre class="tree reveal"><code><span class="dir">bookshelf/</span>
+  <span class="dir">domain/</span>       <span class="comment">Book, Member, Loan, Result, BookshelfError</span>
+  <span class="dir">service/</span>      <span class="comment">BookService, LoanService</span>
+  <span class="dir">persistence/</span>  <span class="comment">repositories</span>
+  <span class="dir">api/</span>          <span class="comment">controllers</span>
+  <span class="dir">test/</span>         <span class="comment">BookshelfFixtures</span></code></pre>
+        <p class="reveal" style="margin-top: var(--content-gap);">Small enough to demo. Structured enough to have real constraints.</p>
+    </div>
+</section>
+
+<!-- Slide 10: Local demo contract -->
+<section class="slide" data-section="inner">
+    <div class="slide-header">
+        <div class="section-num">03</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span class="active">INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Local demo contract</h2>
+        <ul class="reveal">
+            <li><code>ollama serve</code></li>
+            <li><code>ollama pull qwen3:8b</code></li>
+            <li>Java 25 with JBang</li>
+            <li>No API key</li>
+            <li>Every step runs locally from <code>ollama_steps/</code></li>
+        </ul>
+    </div>
+</section>
+
+<!-- Slide 11: The loop -->
+<section class="slide" data-section="inner">
+    <div class="slide-header">
+        <div class="section-num">03</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span class="active">INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">The inner harness is just a loop</h2>
+        <pre class="reveal"><code><span class="k">while</span> (<span class="k">true</span>) {
+    <span class="k">var</span> response = <span class="f">chat</span>(messages, tools);
+    messages.<span class="f">add</span>(<span class="f">assistant</span>(response));
+
+    <span class="k">if</span> (response.<span class="f">toolCalls</span>().<span class="f">isEmpty</span>()) <span class="k">break</span>;
+
+    <span class="k">for</span> (<span class="k">var</span> call : response.<span class="f">toolCalls</span>()) {
+        messages.<span class="f">add</span>(<span class="f">toolResult</span>(call.<span class="f">name</span>(), <span class="f">execute</span>(call)));
+    }
+}</code></pre>
+    </div>
+    <div class="slide-refs">
+        <span>Ball, "How to Build an Agent," 2026</span>
+        <span>Andersen, "A Coding Agent in 260 Lines of Java"</span>
+    </div>
+</section>
+
+<!-- Slide 12: DEMO GAP 1 - The loop -->
+<section class="slide" data-section="inner">
+    <div class="slide-header">
+        <div class="section-num">03</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span class="active">INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content" style="align-items: center;">
+        <div class="demo-card reveal-scale">
+            <div class="demo-label">LIVE CODE</div>
+            <h2>Code switch 1: the loop</h2>
+            <div class="file">ollama_steps/step00_loop.java</div>
+            <div class="cmd">$ jbang ollama_steps/step00_loop.java</div>
+            <ul>
+                <li>Model call and tool schema</li>
+                <li>Tool execution and result</li>
+                <li>Result appended as a message</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 13: Four operations -->
+<section class="slide" data-section="inner">
+    <div class="slide-header">
+        <div class="section-num">03</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span class="active">INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Four operations repeat</h2>
+        <ol class="reveal">
+            <li>Send conversation and tools to the model</li>
+            <li>Parse text and tool calls</li>
+            <li>Execute allowed tools</li>
+            <li>Append tool results back into the conversation</li>
+        </ol>
+        <p class="reveal" style="margin-top: var(--content-gap);"><strong>Everything else in this talk</strong> is about improving the harness around those four operations.</p>
+    </div>
+</section>
+
+<!-- Slide 14: Tools -->
+<section class="slide" data-section="inner">
+    <div class="slide-header">
+        <div class="section-num">03</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span class="active">INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Tools define the action space</h2>
+        <p class="reveal">A coding agent is not powerful because it can "think" about files. It becomes powerful when we expose actions:</p>
+        <ul class="reveal" style="margin-top: var(--element-gap);">
+            <li>Read a file</li>
+            <li>Write a file</li>
+            <li>Run a test</li>
+            <li>Run a codemod</li>
+            <li>Load a project skill</li>
+        </ul>
+    </div>
+</section>
+
+<!-- Slide 15: Prompt, permissions, observability -->
+<section class="slide" data-section="inner">
+    <div class="slide-header">
+        <div class="section-num">03</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span class="active">INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Prompt, permissions, observability</h2>
+        <p class="reveal">The inner harness needs mundane engineering:</p>
+        <ul class="reveal">
+            <li>System prompt that says what kind of assistant this is</li>
+            <li>Path restrictions and tool permissions</li>
+            <li>Transcript of actions and results</li>
+            <li>Failures that are visible enough to debug</li>
+        </ul>
+        <p class="reveal" style="margin-top: var(--content-gap);">The boring parts are what make the exciting parts controllable.</p>
+    </div>
+</section>
+
+<!-- =========================================== -->
+<!-- SECTION 04: OUTER HARNESS                   -->
+<!-- =========================================== -->
+
+<!-- Slide 16: The wall -->
+<section class="slide" data-section="outer">
+    <div class="slide-header">
+        <div class="section-num">04</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span class="active">OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">The wall</h2>
+        <p class="reveal">An inner harness can edit code, but it does not know your organization.</p>
+        <ul class="reveal" style="margin-top: var(--element-gap);">
+            <li>Repeats the same local mistake</li>
+            <li>Hand-edits transformations you already know how to automate</li>
+            <li>Violates architecture without noticing</li>
+            <li>Writes tests that prove the wrong behaviour</li>
+        </ul>
+    </div>
+</section>
+
+<!-- Slide 17: Outer harness: the job -->
+<section class="slide" data-section="outer">
+    <div class="slide-header">
+        <div class="section-num">04</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span class="active">OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Outer harness: the job</h2>
+        <p class="lead reveal">Two goals:</p>
+        <ul class="reveal" style="margin-top: var(--element-gap); list-style: none; padding-left: 0;">
+            <li><strong>Steer before action</strong> with context, conventions, and deterministic tools</li>
+            <li style="margin-top: var(--element-gap);"><strong>Catch after action</strong> with sensors the agent can use to self-correct</li>
+        </ul>
+        <p class="reveal" style="margin-top: var(--content-gap);">This is where agentic coding becomes software engineering again.</p>
+    </div>
+</section>
+
+<!-- Slide 18: The 2x2 -->
+<section class="slide" data-section="outer">
+    <div class="slide-header">
+        <div class="section-num">04</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span class="active">OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">The 2x2</h2>
+        <table class="reveal">
+            <thead>
+                <tr><th></th><th>Computational</th><th>Inferential</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Feedforward</td>
+                    <td>Deterministic tools before write</td>
+                    <td>Context and skills before write</td>
+                </tr>
+                <tr>
+                    <td>Feedback</td>
+                    <td>Tests, linters, architecture rules</td>
+                    <td>Model review after write</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="reveal" style="margin-top: var(--content-gap);"><strong>Direction:</strong> before or after the agent acts. <strong>Mechanism:</strong> deterministic or probabilistic.</p>
+    </div>
+    <div class="slide-refs">
+        <span>Böckeler, Thoughtworks, 2025</span>
+    </div>
+</section>
+
+<!-- Slide 19: The filled map -->
+<section class="slide" data-section="outer">
+    <div class="slide-header">
+        <div class="section-num">04</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span class="active">OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">The filled map</h2>
+        <table class="reveal">
+            <thead>
+                <tr><th></th><th>Computational</th><th>Inferential</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Feedforward</td>
+                    <td>Codemod tool</td>
+                    <td><code>AGENTS.md</code>, skills</td>
+                </tr>
+                <tr>
+                    <td>Feedback</td>
+                    <td>Linter, ArchUnit, tests</td>
+                    <td>LLM-as-judge review</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="reveal" style="margin-top: var(--content-gap);">The point is not to pick one cell. The point is to <strong>light up the map</strong>.</p>
+    </div>
+</section>
+
+<!-- Slide 20: AGENTS.md -->
+<section class="slide" data-section="outer">
+    <div class="slide-header">
+        <div class="section-num">04</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span class="active">OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal"><code>AGENTS.md</code>: feedforward inferential</h2>
+        <p class="reveal">It gives the model a compressed version of project judgment:</p>
+        <ul class="reveal">
+            <li>Domain rules</li>
+            <li>Architecture boundaries</li>
+            <li>Testing conventions</li>
+            <li>Preferred APIs</li>
+            <li>Forbidden shortcuts</li>
+        </ul>
+        <p class="reveal" style="margin-top: var(--content-gap);">It improves the first attempt, but it <strong>cannot prove the result</strong>.</p>
+    </div>
+</section>
+
+<!-- Slide 21: Skills -->
+<section class="slide" data-section="outer">
+    <div class="slide-header">
+        <div class="section-num">04</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span class="active">OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Skills: context on demand</h2>
+        <p class="reveal">Do not cram every rule into the first prompt. Expose focused guidance as a tool:</p>
+        <pre class="reveal"><code>agent.<span class="f">registerTool</span>(<span class="t">LoadSkill</span>.SPEC,
+    tu <span class="k">-&gt;</span> tu.<span class="f">input</span>(<span class="t">LoadSkill</span>.<span class="k">class</span>).<span class="f">execute</span>());</code></pre>
+        <p class="reveal" style="margin-top: var(--content-gap);">The agent asks for the detail when the task needs it.</p>
+    </div>
+</section>
+
+<!-- Slide 22: Codemod -->
+<section class="slide" data-section="outer">
+    <div class="slide-header">
+        <div class="section-num">04</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span class="active">OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Codemod: feedforward computational</h2>
+        <p class="reveal">Some work should not be free-handed by a model.</p>
+        <pre class="reveal"><code>agent.<span class="f">registerTool</span>(<span class="t">RunCodemod</span>.SPEC,
+    tu <span class="k">-&gt;</span> tu.<span class="f">input</span>(<span class="t">RunCodemod</span>.<span class="k">class</span>).<span class="f">execute</span>());</code></pre>
+        <p class="reveal" style="margin-top: var(--content-gap);">If a transformation is known, encode it once and let the agent choose it.</p>
+    </div>
+</section>
+
+<!-- Slide 23: Guides do not verify -->
+<section class="slide" data-section="outer">
+    <div class="slide-header">
+        <div class="section-num">04</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span class="active">OUTER</span><span>SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Guides do not verify</h2>
+        <p class="reveal">Feedforward controls reduce the chance of a bad first attempt. They do not answer:</p>
+        <ul class="reveal">
+            <li>Did the agent follow the rule?</li>
+            <li>Did the edit compile?</li>
+            <li>Did the architecture boundary hold?</li>
+            <li>Did the behaviour match the business rule?</li>
+        </ul>
+        <p class="reveal" style="margin-top: var(--content-gap);"><strong>That is why the right half of the talk is about sensors.</strong></p>
+    </div>
+</section>
+
+<!-- =========================================== -->
+<!-- SECTION 05: SENSORS                         -->
+<!-- =========================================== -->
+
+<!-- Slide 24: Linter sensor -->
+<section class="slide" data-section="sensors">
+    <div class="slide-header">
+        <div class="section-num">05</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span class="active">SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Linter sensor: feedback computational</h2>
+        <pre class="reveal"><code>agent.afterWriteHook = (filePath, content) <span class="k">-&gt;</span> {
+    <span class="k">if</span> (!filePath.<span class="f">endsWith</span>(<span class="s">".java"</span>)) <span class="k">return null</span>;
+
+    <span class="k">var</span> output = <span class="f">runResultUnwrapChecker</span>(filePath);
+    <span class="k">return</span> output.<span class="f">failed</span>()
+        ? <span class="s">"LINTER FEEDBACK:\n"</span> + output.<span class="f">text</span>()
+        : <span class="k">null</span>;
+};</code></pre>
+        <p class="reveal" style="margin-top: var(--content-gap);">The linter does not just fail. It <strong>teaches the agent how to repair</strong>.</p>
+    </div>
+</section>
+
+<!-- Slide 25: DEMO GAP 2 - Self-correction -->
+<section class="slide" data-section="sensors">
+    <div class="slide-header">
+        <div class="section-num">05</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span class="active">SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content" style="align-items: center;">
+        <div class="demo-card reveal-scale">
+            <div class="demo-label">LIVE CODE</div>
+            <h2>Code switch 2: self-correction</h2>
+            <div class="file">ollama_steps/step07_linter_sensor.java</div>
+            <div class="cmd">Run a task that asks for unsafe Result narrowing.</div>
+            <ul>
+                <li><code>afterWriteHook</code> triggers on every write</li>
+                <li>Linter output injected as feedback</li>
+                <li>Agent revises its own diff</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 26: Sensor messages are prompts -->
+<section class="slide" data-section="sensors">
+    <div class="slide-header">
+        <div class="section-num">05</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span class="active">SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Sensor messages are prompts</h2>
+        <div class="two-col reveal">
+            <div>
+                <div class="col-label">For humans</div>
+                <pre><code><span class="p">Avoid direct Success casts.</span></code></pre>
+            </div>
+            <div>
+                <div class="col-label">For agents</div>
+                <pre><code><span class="k">ERROR:</span> Do not cast Result to Success.
+<span class="t">WHY:</span> This bypasses error handling.
+<span class="s">FIX:</span> Use pattern matching and
+     return the error branch.</code></pre>
+            </div>
+        </div>
+        <p class="reveal" style="margin-top: var(--content-gap);">Feedback optimized for repair is part of the harness.</p>
+    </div>
+</section>
+
+<!-- Slide 27: Architecture sensor -->
+<section class="slide" data-section="sensors">
+    <div class="slide-header">
+        <div class="section-num">05</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span class="active">SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Architecture sensor</h2>
+        <p class="reveal">Some rules are not local to one line.</p>
+        <pre class="reveal"><code><span class="k">if</span> (filePath.<span class="f">contains</span>(<span class="s">"bookshelf/src/main"</span>)) {
+    <span class="f">run</span>(<span class="s">"mvn test -Dtest=BookshelfArchitectureTest"</span>);
+}</code></pre>
+        <p class="reveal" style="margin-top: var(--content-gap);">ArchUnit turns module boundaries into <strong>executable feedback</strong>.</p>
+    </div>
+</section>
+
+<!-- Slide 28: LLM-as-judge -->
+<section class="slide" data-section="sensors">
+    <div class="slide-header">
+        <div class="section-num">05</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span class="active">SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">LLM-as-judge: feedback inferential</h2>
+        <p class="reveal">After deterministic sensors pass, a second model can review the diff:</p>
+        <pre class="reveal"><code><span class="k">var</span> review = agent.<span class="f">complete</span>(
+    architectureReviewPrompt,
+    <span class="s">"Review this diff:\n\n```diff\n"</span> + diff + <span class="s">"\n```"</span>);</code></pre>
+        <p class="reveal" style="margin-top: var(--content-gap);">Use it where static checks <strong>cannot see the intent</strong>.</p>
+    </div>
+</section>
+
+<!-- Slide 29: All four cells lit -->
+<section class="slide" data-section="sensors">
+    <div class="slide-header">
+        <div class="section-num">05</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span class="active">SENSORS</span><span>GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">All four cells lit</h2>
+        <table class="reveal">
+            <thead>
+                <tr><th></th><th>Computational</th><th>Inferential</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Feedforward</td>
+                    <td>Codemod</td>
+                    <td><code>AGENTS.md</code>, skills</td>
+                </tr>
+                <tr>
+                    <td>Feedback</td>
+                    <td>Linter, ArchUnit</td>
+                    <td>Architecture review</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="reveal" style="margin-top: var(--content-gap);">The agent starts to feel less like a chatbot and more like a <strong>constrained engineering system</strong>.</p>
+    </div>
+</section>
+
+<!-- =========================================== -->
+<!-- SECTION 06: THE BEHAVIOUR GAP               -->
+<!-- =========================================== -->
+
+<!-- Slide 30: Keep quality left -->
+<section class="slide" data-section="gap">
+    <div class="slide-header">
+        <div class="section-num">06</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span class="active">GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Keep quality left</h2>
+        <p class="reveal">Prefer deterministic controls when the rule is known:</p>
+        <ul class="reveal">
+            <li>Codemods for repeatable edits</li>
+            <li>Tests for behaviour you can specify</li>
+            <li>Linters for local constraints</li>
+            <li>Architecture tests for boundaries</li>
+        </ul>
+        <p class="reveal" style="margin-top: var(--content-gap);">The outer harness should make good work cheaper, <strong>not just make bad work louder</strong>.</p>
+    </div>
+</section>
+
+<!-- Slide 31: The behaviour gap -->
+<section class="slide" data-section="gap">
+    <div class="slide-header">
+        <div class="section-num">06</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span class="active">GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">The behaviour gap</h2>
+        <p class="reveal">All sensors can pass and the feature can still be wrong.</p>
+        <blockquote class="reveal" style="margin-top: var(--content-gap);">Extend a loan by 7 days.</blockquote>
+        <p class="reveal" style="margin-top: var(--element-gap);">Hidden requirement:</p>
+        <blockquote class="reveal"><strong>7 business days</strong>, excluding weekends.</blockquote>
+        <p class="reveal" style="margin-top: var(--content-gap);">Green checks can still encode the wrong product decision.</p>
+    </div>
+</section>
+
+<!-- Slide 32: DEMO GAP 3 - The honest frontier -->
+<section class="slide" data-section="gap">
+    <div class="slide-header">
+        <div class="section-num">06</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span class="active">GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content" style="align-items: center;">
+        <div class="demo-card reveal-scale">
+            <div class="demo-label">LIVE CODE</div>
+            <h2>Code switch 3: the honest frontier</h2>
+            <div class="file">ollama_steps/step10_behaviour_gap.java</div>
+            <div class="cmd">All sensors active. Behaviour still questionable.</div>
+            <ul>
+                <li>Linter sensor passes</li>
+                <li>ArchUnit sensor passes</li>
+                <li>Architecture review passes</li>
+                <li>But the domain logic is wrong</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 33: Why green tests can lie -->
+<section class="slide" data-section="gap">
+    <div class="slide-header">
+        <div class="section-num">06</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span class="active">GAP</span><span>CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Why green tests can lie</h2>
+        <p class="reveal">An agent can write:</p>
+        <ul class="reveal">
+            <li>Code</li>
+            <li>Tests</li>
+            <li>Documentation</li>
+            <li>Explanations</li>
+        </ul>
+        <p class="reveal" style="margin-top: var(--content-gap);">If all four are generated from the same misunderstanding, <strong>consistency is not correctness</strong>.</p>
+    </div>
+</section>
+
+<!-- =========================================== -->
+<!-- SECTION 07: CLOSE                           -->
+<!-- =========================================== -->
+
+<!-- Slide 34: What changes for engineers -->
+<section class="slide" data-section="close">
+    <div class="slide-header">
+        <div class="section-num">07</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span class="active">CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">What changes for engineers</h2>
+        <p class="reveal">We stop treating coding agents as individual geniuses. We start treating them as <strong>processes</strong>:</p>
+        <ul class="reveal">
+            <li>Narrow permissions</li>
+            <li>Repeatable tools</li>
+            <li>Executable conventions</li>
+            <li>Feedback designed for repair</li>
+            <li>Review where semantics are uncertain</li>
+        </ul>
+    </div>
+</section>
+
+<!-- Slide 35: Monday morning version -->
+<section class="slide" data-section="close">
+    <div class="slide-header">
+        <div class="section-num">07</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span class="active">CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Monday morning version</h2>
+        <p class="reveal">Pick one repo and add:</p>
+        <ol class="reveal">
+            <li>A short <code>AGENTS.md</code></li>
+            <li>One deterministic tool the agent should use instead of hand-editing</li>
+            <li>One linter message written for model self-correction</li>
+            <li>One architecture or behaviour test that runs automatically</li>
+            <li>One review prompt for a gap your tests do not cover</li>
+        </ol>
+    </div>
+</section>
+
+<!-- Slide 36: Closing -->
+<section class="slide closing-slide" data-section="close">
+    <div class="slide-header">
+        <div class="section-num">07</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span class="active">CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal" style="font-size: var(--title-size);">Agentic coding is not just a model capability.</h2>
+        <p class="lead reveal" style="margin-top: var(--content-gap); text-align: center; max-width: 650px;">It is an engineering environment.</p>
+        <p class="reveal" style="margin-top: var(--content-gap); text-align: center; max-width: 650px;">The teams that get leverage will not be the teams with the longest prompts. They will be the teams with the <strong>best harnesses</strong>.</p>
+    </div>
+</section>
+
+<!-- Slide 37: Discussion -->
+<section class="slide" data-section="close">
+    <div class="slide-header">
+        <div class="section-num">07</div>
+        <div class="breadcrumbs">
+            <span>OPENING</span><span>HARNESS</span><span>INNER</span><span>OUTER</span><span>SENSORS</span><span>GAP</span><span class="active">CLOSE</span>
+        </div>
+    </div>
+    <div class="slide-content">
+        <h2 class="reveal">Discussion</h2>
+        <p class="lead reveal">Where does your current agent loop fail?</p>
+        <ul class="reveal" style="margin-top: var(--content-gap);">
+            <li>Missing context before the edit</li>
+            <li>Weak deterministic tools</li>
+            <li>No feedback after the edit</li>
+            <li>Semantic gaps that tests do not express</li>
+        </ul>
+    </div>
+</section>
+
+<!-- ===========================================
+     JAVASCRIPT: SLIDE CONTROLLER + EDITOR
+     =========================================== -->
+<script>
+/* === SLIDE PRESENTATION CONTROLLER === */
+class SlidePresentation {
+    constructor() {
+        this.slides = document.querySelectorAll('.slide');
+        this.currentSlide = 0;
+        this.isScrolling = false;
+        this.scrollTimeout = null;
+        this.setupIntersectionObserver();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupWheelNav();
+        this.setupProgressBar();
+        this.setupNavDots();
+        this.hideHintAfterDelay();
+    }
+
+    setupIntersectionObserver() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    const index = Array.from(this.slides).indexOf(entry.target);
+                    if (index !== -1) {
+                        this.currentSlide = index;
+                        this.updateProgressBar();
+                        this.updateNavDots();
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+        this.slides.forEach(slide => observer.observe(slide));
+    }
+
+    goToSlide(index) {
+        if (index >= 0 && index < this.slides.length) {
+            this.slides[index].scrollIntoView({ behavior: 'smooth' });
+            this.currentSlide = index;
+        }
+    }
+
+    setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+            if (e.target.getAttribute('contenteditable')) return;
+            switch(e.key) {
+                case 'ArrowDown': case 'ArrowRight': case ' ': case 'PageDown':
+                    e.preventDefault(); this.goToSlide(this.currentSlide + 1); break;
+                case 'ArrowUp': case 'ArrowLeft': case 'PageUp':
+                    e.preventDefault(); this.goToSlide(this.currentSlide - 1); break;
+                case 'Home':
+                    e.preventDefault(); this.goToSlide(0); break;
+                case 'End':
+                    e.preventDefault(); this.goToSlide(this.slides.length - 1); break;
+            }
+        });
+    }
+
+    setupTouchNav() {
+        let startY = 0;
+        document.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true });
+        document.addEventListener('touchend', (e) => {
+            const diff = startY - e.changedTouches[0].clientY;
+            if (Math.abs(diff) > 50) {
+                this.goToSlide(this.currentSlide + (diff > 0 ? 1 : -1));
+            }
+        }, { passive: true });
+    }
+
+    setupWheelNav() {
+        document.addEventListener('wheel', (e) => {
+            if (this.isScrolling) return;
+            if (Math.abs(e.deltaY) < 30) return;
+            this.isScrolling = true;
+            this.goToSlide(this.currentSlide + (e.deltaY > 0 ? 1 : -1));
+            clearTimeout(this.scrollTimeout);
+            this.scrollTimeout = setTimeout(() => { this.isScrolling = false; }, 800);
+        }, { passive: true });
+    }
+
+    setupProgressBar() {
+        this.progressBar = document.getElementById('progressBar');
+        this.updateProgressBar();
+    }
+
+    updateProgressBar() {
+        if (!this.progressBar) return;
+        const progress = ((this.currentSlide + 1) / this.slides.length) * 100;
+        this.progressBar.style.width = progress + '%';
+    }
+
+    setupNavDots() {
+        this.navDotsContainer = document.getElementById('navDots');
+        if (!this.navDotsContainer) return;
+        this.navDotsContainer.innerHTML = '';
+        this.slides.forEach((_, i) => {
+            const dot = document.createElement('button');
+            dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+            dot.addEventListener('click', () => this.goToSlide(i));
+            this.navDotsContainer.appendChild(dot);
+        });
+    }
+
+    updateNavDots() {
+        if (!this.navDotsContainer) return;
+        const dots = this.navDotsContainer.querySelectorAll('.nav-dot');
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === this.currentSlide);
+        });
+    }
+
+    hideHintAfterDelay() {
+        const hint = document.getElementById('keyboardHint');
+        if (hint) setTimeout(() => hint.classList.add('hidden'), 4000);
+    }
+}
+
+/* === INLINE EDITOR === */
+class InlineEditor {
+    constructor() {
+        this.isActive = false;
+        this.storageKey = 'harness-talk-edits';
+        this.setupControls();
+        this.loadSavedEdits();
+    }
+
+    setupControls() {
+        const editToggle = document.getElementById('editToggle');
+        const hotzone = document.getElementById('editHotzone');
+        let hideTimeout = null;
+
+        editToggle.addEventListener('click', () => this.toggleEditMode());
+
+        hotzone.addEventListener('mouseenter', () => {
+            clearTimeout(hideTimeout);
+            editToggle.classList.add('show');
+        });
+        hotzone.addEventListener('mouseleave', () => {
+            hideTimeout = setTimeout(() => {
+                if (!this.isActive) editToggle.classList.remove('show');
+            }, 400);
+        });
+        editToggle.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+        editToggle.addEventListener('mouseleave', () => {
+            hideTimeout = setTimeout(() => {
+                if (!this.isActive) editToggle.classList.remove('show');
+            }, 400);
+        });
+        hotzone.addEventListener('click', () => this.toggleEditMode());
+
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'e' || e.key === 'E') && !e.target.getAttribute('contenteditable')) {
+                this.toggleEditMode();
+            }
+            if (e.key === 's' && (e.ctrlKey || e.metaKey) && this.isActive) {
+                e.preventDefault();
+                this.exportFile();
+            }
+        });
+    }
+
+    toggleEditMode() {
+        this.isActive = !this.isActive;
+        const toggle = document.getElementById('editToggle');
+        const banner = document.getElementById('editBanner');
+
+        if (this.isActive) {
+            document.body.classList.add('edit-active');
+            toggle.classList.add('active');
+            toggle.innerHTML = '&#10003;';
+            banner.classList.add('active');
+            document.querySelectorAll('h1, h2, h3, p, li, blockquote, .lead, .col-label, .demo-label, .title-badge, .quote-label').forEach(el => {
+                if (!el.closest('nav') && !el.closest('.edit-banner')) {
+                    el.setAttribute('contenteditable', 'true');
+                }
+            });
+        } else {
+            document.body.classList.remove('edit-active');
+            toggle.classList.remove('active');
+            toggle.innerHTML = '&#9998;';
+            banner.classList.remove('active');
+            document.querySelectorAll('[contenteditable]').forEach(el => {
+                el.removeAttribute('contenteditable');
+            });
+            this.saveEdits();
+        }
+    }
+
+    saveEdits() {
+        const data = {};
+        document.querySelectorAll('.slide').forEach((slide, i) => {
+            const texts = [];
+            slide.querySelectorAll('h1, h2, h3, p, li, blockquote').forEach(el => {
+                texts.push(el.innerHTML);
+            });
+            data['slide_' + i] = texts;
+        });
+        try { localStorage.setItem(this.storageKey, JSON.stringify(data)); } catch(e) {}
+    }
+
+    loadSavedEdits() {
+        try {
+            const data = JSON.parse(localStorage.getItem(this.storageKey));
+            if (!data) return;
+            document.querySelectorAll('.slide').forEach((slide, i) => {
+                const saved = data['slide_' + i];
+                if (!saved) return;
+                const els = slide.querySelectorAll('h1, h2, h3, p, li, blockquote');
+                els.forEach((el, j) => {
+                    if (saved[j] !== undefined) el.innerHTML = saved[j];
+                });
+            });
+        } catch(e) {}
+    }
+
+    exportFile() {
+        const editableEls = Array.from(document.querySelectorAll('[contenteditable]'));
+        editableEls.forEach(el => el.removeAttribute('contenteditable'));
+        document.body.classList.remove('edit-active');
+
+        const editToggle = document.getElementById('editToggle');
+        const editBanner = document.getElementById('editBanner');
+        editToggle?.classList.remove('active', 'show');
+        editBanner?.classList.remove('active', 'show');
+
+        const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+        document.body.classList.add('edit-active');
+        editableEls.forEach(el => el.setAttribute('contenteditable', 'true'));
+        editToggle?.classList.add('active');
+        editBanner?.classList.add('active');
+
+        const blob = new Blob([html], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'presentation.html';
+        a.click();
+        URL.revokeObjectURL(a.href);
+    }
+}
+
+/* === INITIALIZE === */
+const presentation = new SlidePresentation();
+const editor = new InlineEditor();
+</script>
+</body>
+</html>
