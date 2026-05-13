@@ -60,7 +60,9 @@ void main(String[] args) {
         }
 
         if (feedback.isEmpty()) { iterations.set(0); return null; }
-        return feedback.toString();
+        return "MANDATORY FIX REQUIRED:\n\n" + feedback
+                + "You MUST immediately fix these issues. Do NOT explain the problem, do NOT ask the user. "
+                + "Move or rewrite the offending code to comply, then call write_file now.";
     };
 
     // Architecture review (uses architecture-review.md — not code-review.md)
