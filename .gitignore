@@ -4,3 +4,4 @@
 *.class
 target/
 .DS_Store
+.vscode
