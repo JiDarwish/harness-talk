@@ -41,7 +41,12 @@ class LoanService:
             member_id=member_id,
             borrowed_at=datetime.now(),
         )
-        return success(self._loan_repository.save(loan))
+        saved_loan = self._loan_repository.save(loan)
+
+        updated_book = book.model_copy(update={"available": False})
+        self._book_repository.save(updated_book)
+
+        return success(saved_loan)
 
     def return_book(self, loan_id: int) -> Result[Loan, BookshelfError]:
         loan = self._loan_repository.find_by_id(loan_id)

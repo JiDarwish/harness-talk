@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from bookshelf.domain.errors import BookAlreadyReturned, LoanNotFound
 from bookshelf.domain.result import Failure, Success
@@ -9,6 +10,11 @@ router = APIRouter(prefix="/api/loans", tags=["loans"])
 _loan_service: LoanService | None = None
 
 
+class CreateLoanRequest(BaseModel):
+    book_id: int
+    member_id: int
+
+
 def init_router(loan_service: LoanService) -> APIRouter:
     global _loan_service
     _loan_service = loan_service
@@ -16,8 +22,8 @@ def init_router(loan_service: LoanService) -> APIRouter:
 
 
 @router.post("")
-def create_loan(book_id: int, member_id: int):
-    result = _loan_service.create_loan(book_id, member_id)
+def create_loan(request: CreateLoanRequest):
+    result = _loan_service.create_loan(request.book_id, request.member_id)
     match result:
         case Success(value):
             return value
